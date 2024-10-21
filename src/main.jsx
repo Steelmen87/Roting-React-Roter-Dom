@@ -8,6 +8,7 @@ import {action as destroyAction} from "./routes/destroy";
 import ErrorPage from "./error-page.jsx";
 import Contact, {
     loader as contactLoader,
+    action as contactAction,
 } from "./routes/contact.jsx";
 import EditContact, {
     action as editAction,
@@ -23,33 +24,80 @@ const router = createBrowserRouter([
         action: rootAction,
         children: [
             {
-                index: true, element: <Index/>
+                errorElement: <ErrorPage/>,
+                children: [
+                    {index: true, element: <Index/>},
+                    {
+                        path: "contacts/:contactId",
+                        element: <Contact/>,
+                        loader: contactLoader,
+                        action: contactAction
+                    },
+                    {
+                        path: "contacts/:contactId/edit",
+                        element: <EditContact/>,
+                        loader: contactLoader,
+                        action: editAction,
+                    },
+                    {
+                        path: "contacts/:contactId/destroy",
+                        action: destroyAction,
+                        errorElement: <div>Oops! There was an error.</div>,
+                    }
+                ]
+
             },
-            {
-                path: "contacts/:contactId",
-                element: <Contact/>,
-                loader: contactLoader
-            },
-            {
-                path: "contacts/:contactId/edit",
-                element: <EditContact/>,
-                loader: contactLoader,
-                action: editAction,
-            },
-            {
-                path: "contacts/:contactId/destroy",
-                action: destroyAction,
-                errorElement: <div>Oops! There was an error.</div>,
-            }
         ]
-
-    },
-
-
-]);
+    }]);
 
 createRoot(document.getElementById('root')).render(
     <StrictMode>
         <RouterProvider router={router}/>
     </StrictMode>,
 )
+
+
+
+//И наш последний трюк: многие люди предпочитают настраивать свои маршруты с помощью JSX.
+// Вы можете сделать это с помощью createRoutesFromElements.При настройке маршрутов нет
+// функциональной разницы между JSX или объектами, это просто стилистическое предпочтение.
+
+/*
+
+import {
+    createRoutesFromElements,
+    createBrowserRouter,
+    Route,
+} from "react-router-dom";
+
+const router = createBrowserRouter(
+    createRoutesFromElements(
+        <Route
+            path="/"
+            element={<Root />}
+            loader={rootLoader}
+            action={rootAction}
+            errorElement={<ErrorPage />}
+        >
+            <Route errorElement={<ErrorPage />}>
+                <Route index element={<Index />} />
+                <Route
+                    path="contacts/:contactId"
+                    element={<Contact />}
+                    loader={contactLoader}
+                    action={contactAction}
+                />
+                <Route
+                    path="contacts/:contactId/edit"
+                    element={<EditContact />}
+                    loader={contactLoader}
+                    action={editAction}
+                />
+                <Route
+                    path="contacts/:contactId/destroy"
+                    action={destroyAction}
+                />
+            </Route>
+        </Route>
+    )
+);*/
